@@ -2,8 +2,8 @@
 
 = Things that need to get done =
 
-*Packet transfer
-*Code to Merge the 2 halfs
+   * Packet transfer
+   * Code to Merge the 2 halfs
 
 
 = Updates =
