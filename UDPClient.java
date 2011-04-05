@@ -16,11 +16,8 @@ class UDPClient {
 		//Create client side UDP Socket
 		DatagramSocket clientSocket = new DatagramSocket(); 
 
-
 		//Get Host IP address
 		InetAddress IPAddress = InetAddress.getByName("localhost"); 
-
-
 
 		//create data Bytes
 		byte[] sendData = new byte[1024]; 
@@ -29,14 +26,11 @@ class UDPClient {
 		byte[] sendDataP1 = new byte[1024]; 
 		byte[] sendDataP2 = new byte[1024];
 		byte[] sendDataH1 = new byte[1024];
-		byte[] combinedBytes = new byte[214748364];  if the first packet passed includes the filesize, then this can be initialized to the exact size of the file, as of now, there are trailing zero'es
-		//dump user input into "sentence", convert and dump into sendData
-	//	System.out.println("Enter generic info to send: ");
-	//	String sentence = inFromUser.readLine(); 
-	//	sendData = sentence.getBytes();
+		byte[] combinedBytes = new byte[214748364];  
+		
+		//if the first packet passed includes the filesize, then this can be initialized to the exact size of the file, as of now, there are trailing zero'es
 
-		//strings server expects
-	
+		//strings server expects	
 		String requestPart1 = "GET F1" , requestHash1 = "GET H1", 
 		requestPart2 = "GET F2", requestHash2 = "GET H2";
 
@@ -47,18 +41,13 @@ class UDPClient {
 		sendDataP2 =requestPart2.getBytes();
 		sendDataH1 =requestHash2.getBytes();
 
-
 		//create packer for data "sendPacket"
 		//passing in sendData, length,IP and port number (hardcoded) 
-		//DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876); 
-		//client conversation
 		DatagramPacket sendRequestPart1 = new DatagramPacket (sendDataP1, sendDataP1.length, IPAddress, 1337);
 		DatagramPacket sendRequestPart2 = new DatagramPacket (sendDataP2, sendDataP2.length, IPAddress, 1337);
 		DatagramPacket sendRequestHashPart1 = new DatagramPacket (sendDataH1, sendDataH1.length, IPAddress, 1337);
 		DatagramPacket sendRequestHashPart2 = new DatagramPacket (sendDataH2, sendDataH2.length, IPAddress, 1337);
-		//beam out packet
-		//clientSocket.send(sendPacket); 
-
+	
 		//create space for expected received packet
 		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length); 
 		DatagramPacket receivePacket2 = new DatagramPacket(receiveData, receiveData.length); 
@@ -102,11 +91,7 @@ class UDPClient {
 
 			fos.write(receivePacket.getData(), 0, receivePacket.getLength());
 			System.out.println("You have writtin to file");
-			
-		
-			
-		
-		
+									
 			byte[] remoteHash = receivePacket.getData();
 
 			// HERE I WILL PUT CODE TO CHECK HASH OF THE PART
@@ -139,9 +124,9 @@ class UDPClient {
 			FileOutputStream fos2 = new FileOutputStream(f2);
                         BufferedOutputStream bos2 = new BufferedOutputStream(fos2);
 			//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=
-                        //+++++++++++++++++++++++THIS IS WHERE WE NEED TO MAKE IT WAIT
-                        //++++++++++++++++++++++++TO FILL BUFFER
-                        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            //+++++++++++++++++++++++THIS IS WHERE WE NEED TO MAKE IT WAIT
+            //++++++++++++++++++++++++TO FILL BUFFER
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         
                         Thread.currentThread().sleep(1000);
                         fos2.write(receivePacket2.getData(), 0, receivePacket2.getLength());
@@ -172,9 +157,6 @@ class UDPClient {
 		while ( !finished ) 
 		{
 
-
-
-
 			//double noofpackets=Math.ceil(((int) (new File("blarg.mp3")).length())/packetsize);
 			//for(double i=0;i<noofpackets+1;i++)
 			//{
@@ -184,17 +166,12 @@ class UDPClient {
 			//System.out.println("Packet:"+(i+1));
 			//bos.write(mybytearray, 0,mybytearray.length);
 			//}
-
-
-
+			
 		}//end of while loop
 
 		//========================= code to put the files together ========
 		//decodes data into clients charset and dumps to "modifiedSentence"
 		//String modifiedSentence = new String(receivePacket.getData()); 
-
-
-
 		//=================================================================
 
 		clientSocket.close(); 
@@ -203,38 +180,26 @@ class UDPClient {
 
 		byte[] digest = null;
 
-
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			InputStream is = new FileInputStream(filename);
-
 
 			try {
 				is = new DigestInputStream(is, md);
 				// read stream to EOF as normal...
 
-
 			} finally {
 				is.close();
-
-
 			}
 			digest = md.digest();
-
-
 			return digest;
-
 
 		} catch (IOException IOE) {
 			System.err.println("Oops io error " + IOE);
 
-
 		} catch (NoSuchAlgorithmException NSAE) {
 			System.err.println("Oops no algorithm " + NSAE);
-
-
 		}
 		return digest;
-
 	}
 } 
