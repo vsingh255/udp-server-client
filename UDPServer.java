@@ -4,74 +4,100 @@ import java.net.*;
 
 class UDPServer {
 
-    public static void main(String args[]) throws Exception {
-        //create server socket
-        DatagramSocket serverSocket = new DatagramSocket(1337);
+	public static void main(String args[]) throws Exception {
+		//create server socket
+		DatagramSocket serverSocket = new DatagramSocket(1337);
 
-        //create data bytes
-        byte[] receiveData = new byte[1024];
-        byte[] sendData = new byte[1024];
-        String filename = "smurfs";
-        CutnCopyBinaryFile helper = new CutnCopyBinaryFile(filename);
+		//create data bytes
+		byte[] receiveData = new byte[1024];       
+		byte[] sendData = new byte[1024];
+		String filename = "smurfs";
+		CutnCopyBinaryFile helper = new CutnCopyBinaryFile(filename);
 
-        while (true) {
-            //dump received packet into server socket
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            serverSocket.receive(receivePacket);
-            
-            System.err.println("you have mail!");
+		while (true) {
+			//dump received packet into server socket
+			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+			System.err.println("you have handshake request");
 
-            //dump data from packet to string "sentence"
-            String sentence = new String(receivePacket.getData(),0,6);
+			serverSocket.receive(receivePacket);
 
-            //hold IP Address of packet in "IPAddres"
-            InetAddress IPAddress = receivePacket.getAddress();
+			System.err.println("you have mail!");
 
-            //hold the port number of packet in "port"
-            int port = receivePacket.getPort();
-            
-            System.err.println("You are about to hit the giant block");
+			//dump data from packet to string "sentence"
+			String sentence = new String(receivePacket.getData(),0,6);
 
-            if (sentence.equalsIgnoreCase("GET F1")) {
-            	System.err.println("Get 1");
-                String fn = helper.getfn1();
-                sendstuff(fn, IPAddress, port, serverSocket);
-            } else if (sentence.equals("GET H1")) {
-            	System.err.println("Get Hash 1");
-                sendstuff(helper.getHash1(), IPAddress, port, serverSocket);
-            } else if (sentence.equals("GET F2")) {
-            	System.err.println("Get 2");
-                String fn = helper.getfn2();
-                sendstuff(fn, IPAddress, port, serverSocket);
-            } else if (sentence.equals("GET H2")) {
-            	System.err.println("Get 2");
-                sendstuff(helper.getHash2(), IPAddress, port, serverSocket);
-            } else {
-                System.err.println("bad input to server");
-            }
-            System.err.println("You made it");
-        } //end of while loop
-    }//end of main
+			//hold IP Address of packet in "IPAddres"
+			InetAddress IPAddress = receivePacket.getAddress();
 
-    public static void sendstuff(String fn, InetAddress IPAddress, int port, DatagramSocket serverSocket) throws Exception {
-        int noOfBytes = 0;
-        long total =0;
-        byte[] b = new byte[1024];
-        FileInputStream fin = new FileInputStream(fn);
-        while ((noOfBytes = fin.read(b)) != -1) {
-            DatagramPacket sendPacket = new DatagramPacket(b, b.length, IPAddress, port);
-            serverSocket.send(sendPacket);
-            //total += noOfBytes;
-            //System.err.println("total :"+total);
-        }
-    }
+			//hold the port number of packet in "port"
+			int port = receivePacket.getPort();
 
-    public static void sendstuff(byte[] stuff, InetAddress IPAddress, int port, DatagramSocket serverSocket) throws Exception {
-        int noOfBytes = 0;
-        byte[] b = stuff;
-        DatagramPacket sendPacket = new DatagramPacket(b, b.length, IPAddress, port);
-        serverSocket.send(sendPacket);
+			System.err.println("You are about to hit the giant block");
 
-    }
+			if (sentence.equalsIgnoreCase("GET F1")) {
+				System.err.println("Get 1");
+				String fn = helper.getfn1();
+				sendstuff(fn, IPAddress, port, serverSocket);
+			} else if (sentence.equals("GET H1")) {
+				System.err.println("Get Hash 1");
+				sendstuff(helper.getHash1(), IPAddress, port, serverSocket);
+			} else if (sentence.equals("GET F2")) {
+				System.err.println("Get 2");
+				String fn = helper.getfn2();
+				sendstuff(fn, IPAddress, port, serverSocket);
+			} else if (sentence.equals("GET H2")) {
+				System.err.println("Get 2");
+				sendstuff(helper.getHash2(), IPAddress, port, serverSocket);
+			} else if (sentence.equals("HS")) {
+				System.err.println("HS");
+				helper.getLengthOfParts();
+				sendstuff2(helper.getLength1(), IPAddress, port, serverSocket);
+				sendstuff2(helper.getLength1(), IPAddress, port, serverSocket);
+
+			}
+
+			else {
+				System.err.println("bad input to server");
+			}
+			System.err.println("You made it");
+		} //end of while loop
+	}//end of main
+
+	public static void sendstuff(String fn, InetAddress IPAddress, int port, DatagramSocket serverSocket) throws Exception {
+		int noOfBytes = 0;
+		long total =0;
+		byte[] b = new byte[1024];
+		FileInputStream fin = new FileInputStream(fn);
+		while ((noOfBytes = fin.read(b)) != -1) {
+			DatagramPacket sendPacket = new DatagramPacket(b, b.length, IPAddress, port);
+			serverSocket.send(sendPacket);
+			//total += noOfBytes;
+			//System.err.println("total :"+total);
+		}
+	}
+
+	public static void sendstuff(byte[] stuff, InetAddress IPAddress, int port, DatagramSocket serverSocket) throws Exception 
+	{
+		int noOfBytes = 0;
+		byte[] b = stuff;
+		DatagramPacket sendPacket = new DatagramPacket(b, b.length, IPAddress, port);
+		serverSocket.send(sendPacket);
+	}
+	/*The method sendstuff2, passes in the length of the respective part, etc
+	 * the int is first converted to a string then converted to a byte[] 
+	 * so that it can be sent as a packet, then sends the newly created packet
+	 * containing the size of the file part to the client.
+	 */
+	public static void sendstuff2(int stuff, InetAddress IPAddress, int port, DatagramSocket serverSocket) throws Exception 
+	{
+		int b = stuff;
+		String Q = Integer.toString(b);
+		byte[] p = Q.getBytes();
+		
+		DatagramPacket sendPacket = new DatagramPacket(p, p.length, IPAddress, port);
+		serverSocket.send(sendPacket);
+	}
+
 }//end of class
+
 
