@@ -26,13 +26,14 @@ class UDPClient {
 		byte[] sendDataP1 = new byte[1024]; 
 		byte[] sendDataP2 = new byte[1024];
 		byte[] sendDataH1 = new byte[1024];
+		byte[] sendDataHS = new byte[1024];
 		byte[] combinedBytes = new byte[214748364];  
 		
 		//if the first packet passed includes the filesize, then this can be initialized to the exact size of the file, as of now, there are trailing zero'es
 
 		//strings server expects	
 		String requestPart1 = "GET F1" , requestHash1 = "GET H1", 
-		requestPart2 = "GET F2", requestHash2 = "GET H2";
+		requestPart2 = "GET F2", requestHash2 = "GET H2", requestDataHS = "HS";
 
 		//convert strings to bytes to sequence of bytes to send to server
 		//stores byte sequence to respective byte[]
@@ -40,6 +41,7 @@ class UDPClient {
 		sendDataH1 =requestHash1.getBytes();
 		sendDataP2 =requestPart2.getBytes();
 		sendDataH1 =requestHash2.getBytes();
+		sendDataHS =requestDataHS.getBytes();
 
 		//create packer for data "sendPacket"
 		//passing in sendData, length,IP and port number (hardcoded) 
@@ -47,10 +49,12 @@ class UDPClient {
 		DatagramPacket sendRequestPart2 = new DatagramPacket (sendDataP2, sendDataP2.length, IPAddress, 1337);
 		DatagramPacket sendRequestHashPart1 = new DatagramPacket (sendDataH1, sendDataH1.length, IPAddress, 1337);
 		DatagramPacket sendRequestHashPart2 = new DatagramPacket (sendDataH2, sendDataH2.length, IPAddress, 1337);
+		DatagramPacket sendHandShake = new DatagramPacket (sendDataHS, sendDataHS.length, IPAddress, 1337);
 	
 		//create space for expected received packet
 		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length); 
 		DatagramPacket receivePacket2 = new DatagramPacket(receiveData, receiveData.length); 
+		DatagramPacket receivePacketHS = new DatagramPacket(receiveData, receiveData.length);
 
 		boolean fin = false;
 		File f1 = new File("blahp1.mp3");
@@ -62,11 +66,29 @@ class UDPClient {
 		while ( !fin)
 		{
 			System.out.println("you are in while loop");
+			
+			
+			System.out.println("you are sending handshake");
+			//Send Handshake packet, this will request the server to send the file size of the parts
+			clientSocket.send(sendHandShake);
+			
+			/* This for loop receives the handshake packet from the server 
+			containing the length of the parts, and (for now) prints the
+			length to console */ 
+			for(int i =0; i<2 ; i++){
+				clientSocket.receive(receivePacketHS);
+				String sentence = new String(receivePacketHS.getData(),0,6);
+				System.err.println("this is the length: " + sentence);				
+			}
+			
+			//Sends request for part 1
 			System.out.println(new String(sendRequestPart1.getData()));
 			clientSocket.send(sendRequestPart1);
 			System.out.println("you have sent request Part1");
 			// UDP Socket wait
 			//receives datagram packet from socket throws into buffer, also had IP and port info.
+					
+			
 			while(counter!=133120)     deliberately erroring this line to draw attention to the fact that the hard coded line needs fixed
 			{
 				clientSocket.receive(receivePacket);
