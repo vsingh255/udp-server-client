@@ -1,0 +1,1 @@
+A JAVA server and client UDP implementation. Where the server's job is to take a file, cut it in half and sends the halves to the client to be merged back together. and some other stuff
